@@ -1,0 +1,49 @@
+Calendar.Server.set_key(bobs_list, "4/-ooAm0v5dyuJ12dbnwnShXewx_XbiyCk0SKIQ62wMcw")
+
+x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/calendars/#{calendar_id}/events",
+%{
+  "Authorization" => "Bearer #{token}",
+})
+
+
+get_url
+set_key
+entries with token!
+
+Calendar.Cache.server_process("Bob's list")
+Todo.Server.add_entry(
+  bobs_list,
+  %{date: {2013, 12, 19}, title: "Dentist"}
+)
+
+curl -d "client_id=803947449568-tksuudgsssh29i8hhqc7s7fdsa4inm5h.apps.googleusercontent.com" -d "client_secret=wftI5JSdALAVEaxeoFS71LvX" -d "code=4/uKAZKvyRHGt0Ni-cos-Av3YN2-XSx3mFIg-40ISbERk" -d "grant_type=authorization_code" -d "redirect_uri=urn:ietf:wg:oauth:2.0:oob" https://www.googleapis.com/oauth2/v4/token
+
+
+curl -H "Authorization: Bearer ya29.Ci8IA2rXmQUlY8hR_MXHz1TKIjZ_rAGIzZfAWlQtvISdDVLIL7IBEo2cbASr8VsoEg" "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4"
+
+
+HTTPoison.get!("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4",
+%{
+  "Authorization" => "Bearer ya29.Ci8IA2rXmQUlY8hR_MXHz1TKIjZ_rAGIzZfAWlQtvISdDVLIL7IBEo2cbASr8VsoEg",
+})
+
+
+[%{"created" => "2013-05-15T13:19:07.000Z",
+   "creator" => %{"displayName" => "Александр Костриков",
+     "email" => "alexandr.kostrikov@gmail.com"},
+   "end" => %{"dateTime" => "2013-05-22T22:00:00+04:00"},
+   "etag" => "\"2738266048322000\"",
+   "htmlLink" => "https://www.google.com/calendar/event?eid=OXRnNnRvNDJwbzR2MmFzMzl2YzUwZnU3MDQgcnNxb2xqMzgwa3ZmMXI4MWFlMm1lODZvZGNAZw",
+   "iCalUID" => "9tg6to42po4v2as39vc50fu704@google.com",
+   "id" => "9tg6to42po4v2as39vc50fu704", "kind" => "calendar#event",
+   "organizer" => %{"displayName" => "Games",
+     "email" => "rsqolj380kvf1r81ae2me86odc@group.calendar.google.com",
+     "self" => true}, "reminders" => %{"useDefault" => true}, "sequence" => 2,
+   "start" => %{"dateTime" => "2013-05-22T21:00:00+04:00"},
+   "status" => "confirmed",
+   "summary" => "eve online поставить #games ",
+   "updated" => "2013-05-21T10:43:44.161Z"}]
+
+
+date, time
+{{1970,1,1}, {0,0,0}}
