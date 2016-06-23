@@ -22,6 +22,22 @@ defmodule Calendar.Server do
     GenServer.call(calendar_server, {:entries})
   end
 
+  def get_events(calendar) do
+    GenServer.call(calendar, {:get_events})
+  end
+
+  def get_event(calendar, event_id) do
+    GenServer.call(calendar, {:get_event, event_id})
+  end
+
+  def create_event(calendar, date, time, description) do
+    GenServer.call(calendar, {:create_event, date, time, description})
+  end
+
+  def delete_event(calendar, event_id) do
+    GenServer.call(calendar, {:delete_event, event_id})
+  end
+
   def whereis(name) do
     Calendar.ProcessRegistry.whereis_name({:calendar_server, name})
   end
@@ -49,13 +65,27 @@ defmodule Calendar.Server do
   end
 
   def handle_call({:set_key, key}, _, {name, calendar_list}) do
-    IO.puts "THe name is: #{name}"
-    IO.puts "The key is #{key}"
     {:reply,Calendar.GoogleEndpoint.set_key(name, key),{name, calendar_list}}
   end
 
   def handle_call({:entries}, _, {name, calendar_list}) do
     {:reply,Calendar.GoogleEndpoint.entries(name),{name, calendar_list}}
+  end
+
+  def handle_call({:get_events}, _, {name, calendar_list}) do
+    {:reply,Calendar.GoogleEndpoint.get_events(name), {name, calendar_list}}
+  end
+
+  def handle_call({:get_event, event_id}, _, {name, calendar_list}) do
+    {:reply,Calendar.GoogleEndpoint.get_event(name, event_id), {name, calendar_list}}
+  end
+
+  def handle_call({:create_event, date, time, description}, _, {name, calendar_list}) do
+    {:reply,Calendar.GoogleEndpoint.create_event(name, date, time, description), {name, calendar_list}}
+  end
+
+  def handle_call({:delete_event, event_id}, _, {name, calendar_list}) do
+    {:reply,Calendar.GoogleEndpoint.delete_event(name, event_id), {name, calendar_list}}
   end
 
   # Needed for testing purposes

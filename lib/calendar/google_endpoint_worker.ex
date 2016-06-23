@@ -30,6 +30,22 @@ defmodule Calendar.GoogleEndpointWorker do
     GenServer.call(via_tuple(worker_id), {:entries, key})
   end
 
+  def get_events(worker_id, key) do
+    GenServer.call(via_tuple(worker_id), {:get_events, key})
+  end
+
+  def get_event(worker_id, key, event_id) do
+    GenServer.call(via_tuple(worker_id), {:get_event, key, event_id})
+  end
+
+  def create_event(worker_id, key, date, time, description) do
+    GenServer.call(via_tuple(worker_id), {:create_event, key, date, time, description})
+  end
+
+  def delete_event(worker_id, key, event_id) do
+    GenServer.call(via_tuple(worker_id), {:delete_event, key, event_id})
+  end
+
   defp via_tuple(worker_id) do
     {:via, Calendar.ProcessRegistry, {:calendar_worker, worker_id}}
   end
@@ -80,6 +96,104 @@ defmodule Calendar.GoogleEndpointWorker do
 
     {:reply, {:ok, x}, token}
   end
+
+  def handle_call({:get_events, _},_, token) do
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+
+    body1 = Poison.Parser.parse!(x.body)
+    [z|rest] = Map.get(body1, "items")
+    cal_id = Map.get(z, "id")
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/calendars/#{cal_id}/events",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+    body1 = Poison.Parser.parse!(x.body)
+    items = Map.get(body1, "items")
+    result = Enum.map(items, fn(x) -> %{
+      "id" => Map.get(x, "id"),
+      "start" => Map.get(x, "start"),
+      "summary" => Map.get(x, "summary")} end)
+
+
+    {:reply, {:ok, result}, token}
+  end
+
+  def handle_call({:get_event,_, event_id},_, token) do
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+
+    body1 = Poison.Parser.parse!(x.body)
+    [z|rest] = Map.get(body1, "items")
+    cal_id = Map.get(z, "id")
+
+    #cal_id rsqolj380kvf1r81ae2me86odc@group.calendar.google.com
+    #token = "ya29.Ci8JA4jPV23ZBZ5UuAux7W8AkQo4nIhE9vx5cCdrKvk2VkfdKBq89rSiyWP1YsT1-Q"
+    IO.puts "cal_id: #{cal_id}, event_id#{event_id}"
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/calendars/#{cal_id}/events/#{event_id}",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+    body1 = Poison.Parser.parse!(x.body)
+
+
+    {:reply, {:ok, body1}, token}
+  end
+
+  def handle_call({:create_event,_, date, time, description},_, token) do
+    #cal_id = "rsqolj380kvf1r81ae2me86odc@group.calendar.google.com"
+    #token = "ya29.Ci8JA4jPV23ZBZ5UuAux7W8AkQo4nIhE9vx5cCdrKvk2VkfdKBq89rSiyWP1YsT1-Q"
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+
+    body1 = Poison.Parser.parse!(x.body)
+    [z|rest] = Map.get(body1, "items")
+    cal_id = Map.get(z, "id")
+
+    #date = {2017,1,1}
+    #time = {0,0,0}
+    {:ok, date_time} = Timex.datetime({date, time}) |> Timex.format("{ISO}")
+
+    x = HTTPoison.post!("https://www.googleapis.com/calendar/v3/calendars/#{cal_id}/events/?alt=json",
+    ~s({"end": {"dateTime": "#{date_time}" },"start": {"dateTime": "#{date_time}" }, "summary": "#{description}"}),
+    %{
+      "Authorization" => "Bearer #{token}",
+      "content-type" => "application/json"
+    })
+    body1 = Poison.Parser.parse!(x.body)
+
+
+    {:reply, {:ok, body1}, token}
+  end
+
+  def handle_call({:delete_event,_,  event_id},_, token) do
+    x = HTTPoison.get!("https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=1&minAccessRole=owner&showDeleted=false&showHidden=false&key=AIzaSyBHnDD0R92S2dFsXagjNEEY7SVcdeCM4v4",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+
+    body1 = Poison.Parser.parse!(x.body)
+    [z|rest] = Map.get(body1, "items")
+    cal_id = Map.get(z, "id")
+
+    #cal_id rsqolj380kvf1r81ae2me86odc@group.calendar.google.com
+    #token = "ya29.Ci8JA4jPV23ZBZ5UuAux7W8AkQo4nIhE9vx5cCdrKvk2VkfdKBq89rSiyWP1YsT1-Q"
+    x = HTTPoison.delete!("https://www.googleapis.com/calendar/v3/calendars/#{cal_id}/events/#{event_id}",
+    %{
+      "Authorization" => "Bearer #{token}",
+    })
+
+
+    {:reply, {:ok, :fine}, token}
+  end
+
+
 
   # Needed for testing purposes
   def handle_info(:stop, state), do: {:stop, :normal, state}

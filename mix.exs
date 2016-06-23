@@ -11,13 +11,14 @@ defmodule GoogleCalendar.Mixfile do
 
   def application do
     [
-      applications: [:logger,:httpoison],
+      applications: [:logger,:httpoison,:timex],
       mod: {Calendar.Application, []}
     ]
   end
 
   defp deps do
     [
+      {:timex, "~> 2.1.6"},
       {:meck, "0.8.2", only: :test},
       {:httpoison, "~> 0.8.0"},
       {:poison, "~> 2.0"}

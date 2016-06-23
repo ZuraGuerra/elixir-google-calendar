@@ -30,6 +30,30 @@ defmodule Calendar.GoogleEndpoint do
     |> Calendar.GoogleEndpointWorker.entries(key)
   end
 
+  def get_events(calendar) do
+    calendar
+    |> choose_worker
+    |> Calendar.GoogleEndpointWorker.get_events(calendar)
+  end
+
+  def get_event(calendar, event_id) do
+    calendar
+    |> choose_worker
+    |> Calendar.GoogleEndpointWorker.get_event(calendar, event_id)
+  end
+
+  def create_event(calendar, date, time, description) do
+    calendar
+    |> choose_worker
+    |> Calendar.GoogleEndpointWorker.create_event(calendar, date, time, description)
+  end
+
+  def delete_event(calendar, event_id) do
+    calendar
+    |> choose_worker
+    |> Calendar.GoogleEndpointWorker.delete_event(calendar, event_id)
+  end
+
   defp choose_worker(key) do
     :erlang.phash2(key, @pool_size) + 1
   end
